@@ -1,0 +1,65 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pizza
+      POSTGRES_PASSWORD: pizza
+      POSTGRES_DB: violations
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  frame_reader:
+    build: ./services/frame_reader
+    profiles: ["app"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file: .env
+    volumes:
+      - ./data/videos:/data/videos:ro
+
+  detection:
+    build: ./services/detection
+    profiles: ["app"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+    env_file: .env
+    volumes:
+      - ./models:/models:ro
+
+  streaming:
+    build: ./services/streaming
+    profiles: ["app"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    profiles: ["app"]
+    depends_on:
+      - streaming
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
