@@ -3,9 +3,9 @@ RUN pip install --no-cache-dir poetry
 WORKDIR /app
 COPY pyproject.toml poetry.lock poetry.toml ./
 COPY shared ./shared
-COPY services/frame_reader ./services/frame_reader
+COPY services/broker ./services/broker
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --only main
-ENV PYTHONPATH=/app/services/frame_reader
-WORKDIR /app/services/frame_reader
+ENV PYTHONPATH=/app/services/broker
+WORKDIR /app/services/broker
 CMD ["python", "main.py"]

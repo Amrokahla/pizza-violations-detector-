@@ -1,0 +1,1 @@
+"""Frame reader microservice."""

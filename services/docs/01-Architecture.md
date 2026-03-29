@@ -104,7 +104,7 @@ Infrastructure services (**broker**, **database**) typically start first; applic
 | [02-Data-Flow-and-Broker.md](./02-Data-Flow-and-Broker.md) | Queues, message shapes, sequencing |
 | [03-Detection-and-Violation-Logic.md](./03-Detection-and-Violation-Logic.md) | ROI, FSM, multi-worker handling |
 | [04-Streaming-and-Frontend.md](./04-Streaming-and-Frontend.md) | APIs and UI contract |
-| `plan/` | Per-service implementation plans (to be added incrementally) |
+| [plan/README.md](./plan/README.md) | Per-microservice implementation plans |
 
 ## 8. Revision history
 

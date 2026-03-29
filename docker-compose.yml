@@ -1,14 +1,27 @@
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - ./infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  broker_setup:
+    build:
+      context: .
+      dockerfile: services/broker/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file: .env
+    restart: "no"
 
   postgres:
     image: postgres:16-alpine
@@ -22,7 +35,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   frame_reader:
-    build: ./services/frame_reader
+    build:
+      context: .
+      dockerfile: services/frame_reader/Dockerfile
     profiles: ["app"]
     depends_on:
       rabbitmq:
@@ -32,7 +47,9 @@ services:
       - ./data/videos:/data/videos:ro
 
   detection:
-    build: ./services/detection
+    build:
+      context: .
+      dockerfile: services/detection/Dockerfile
     profiles: ["app"]
     depends_on:
       rabbitmq:
@@ -44,7 +61,9 @@ services:
       - ./models:/models:ro
 
   streaming:
-    build: ./services/streaming
+    build:
+      context: .
+      dockerfile: services/streaming/Dockerfile
     profiles: ["app"]
     depends_on:
       rabbitmq:
